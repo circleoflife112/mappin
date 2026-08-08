@@ -1,7 +1,7 @@
 // src/App.jsx
 import MapPanel from "./components/MapPanel";
-import LeafletMap from "./components/maps/LeafletMap";
+import KakaoMap from "./components/maps/KakaoMap";
 
 export default function App() {
-  return <MapPanel MapImpl={LeafletMap} />;
+  return <MapPanel MapImpl={KakaoMap} />;
 }

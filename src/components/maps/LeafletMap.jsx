@@ -31,6 +31,12 @@ export default function LeafletMap({
     <MapContainer
       center={[camera.lat, camera.lng]}
       zoom={camera.zoom}
+      minZoom={6}
+      maxBounds={[
+        [33.0, 124.5], // 남서쪽 (제주 아래)
+        [39.5, 132.0], // 북동쪽 (독도 위)
+      ]}
+      maxBoundsViscosity={1.0}
       scrollWheelZoom
       style={{ height: "100%", width: "100%" }}
     >
