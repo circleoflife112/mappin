@@ -5,7 +5,7 @@ import { useGeolocation } from "../hooks/useGeolocation";
 import { geocode } from "../lib/geocode";
 
 export default function MapPanel({ MapImpl }) {
-  const { places, add, remove } = usePlaces([
+  const { places, set } = usePlaces([
     { id: "1", lat: 37.5665, lng: 126.978, name: "서울시청" },
   ]);
   const { coords, status, locate } = useGeolocation();
@@ -24,7 +24,7 @@ export default function MapPanel({ MapImpl }) {
     e.preventDefault();
     const [hit] = await geocode(query);
     if (!hit) return alert("결과 없음");
-    add(hit);
+    set(hit); // add → set
     setCamera({ lat: hit.lat, lng: hit.lng, zoom: 16 });
   };
 
@@ -47,7 +47,7 @@ export default function MapPanel({ MapImpl }) {
         <MapImpl
           camera={camera}
           markers={places}
-          onMapClick={(latlng) => add({ ...latlng, name: "새 장소" })}
+          onMapClick={(latlng) => set({ ...latlng, name: "새 장소" })} // add → set
           onMarkerClick={(id) => remove(id)}
         />
       </div>

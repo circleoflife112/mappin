@@ -12,11 +12,9 @@ export function usePlaces(initial = []) {
     setPlaces((prev) => prev.filter((p) => p.id !== id));
   }, []);
 
-  const update = useCallback((id, patch) => {
-    setPlaces((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, ...patch } : p)),
-    );
+  const set = useCallback((p) => {
+    setPlaces([{ id: crypto.randomUUID(), ...p }]); // 배열을 새 마커 하나로 교체
   }, []);
 
-  return { places, add, remove, update };
+  return { places, add, set, remove, set };
 }
