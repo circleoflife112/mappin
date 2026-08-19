@@ -5,11 +5,11 @@ import { useGeolocation } from "../hooks/useGeolocation";
 import { geocode } from "../lib/geocode";
 
 const CATEGORIES = [
-  { code: "CE7", label: "카페" },
-  { code: "FD6", label: "맛집" },
-  { code: "CS2", label: "편의점" },
-  { code: "PM9", label: "약국" },
-  { code: "SW8", label: "지하철" },
+  { code: "CE7", label: "카페", color: "#8b5cf6" },
+  { code: "FD6", label: "맛집", color: "#ef4444" },
+  { code: "CS2", label: "편의점", color: "#3b82f6" },
+  { code: "PM9", label: "약국", color: "#10b981" },
+  { code: "SW8", label: "지하철", color: "#f59e0b" },
 ];
 
 export default function MapPanel({ MapImpl }) {
@@ -18,13 +18,22 @@ export default function MapPanel({ MapImpl }) {
   ]);
   const { coords, status, locate } = useGeolocation();
   const [query, setQuery] = useState("");
-  const [category, setCategory] = useState(null); // ✅ 함수 안으로
+  const [activeCategories, setActiveCategories] = useState(new Set());
   const [poiList, setPoiList] = useState([]); // ✅ 함수 안으로
   const [camera, setCamera] = useState({
     lat: 37.5665,
     lng: 126.978,
     zoom: 13,
   });
+
+  const toggleCategory = (code) => {
+    setActiveCategories((prev) => {
+      const next = new Set(prev);
+      if (next.has(code)) next.delete(code);
+      else next.add(code);
+      return next;
+    });
+  };
 
   useEffect(() => {
     if (coords) setCamera({ ...coords, zoom: 16 });
@@ -62,30 +71,34 @@ export default function MapPanel({ MapImpl }) {
           flexWrap: "wrap",
         }}
       >
-        {CATEGORIES.map((c) => (
-          <button
-            key={c.code}
-            type="button"
-            onClick={() => setCategory(category === c.code ? null : c.code)}
-            style={{
-              padding: "4px 10px",
-              background: category === c.code ? "#333" : "#eee",
-              color: category === c.code ? "#fff" : "#333",
-              border: "none",
-              borderRadius: 4,
-              cursor: "pointer",
-            }}
-          >
-            {c.label}
-          </button>
-        ))}
+        {CATEGORIES.map((c) => {
+          const on = activeCategories.has(c.code);
+          return (
+            <button
+              key={c.code}
+              type="button"
+              onClick={() => toggleCategory(c.code)}
+              style={{
+                padding: "4px 10px",
+                background: on ? c.color : "#eee",
+                color: on ? "#fff" : "#333",
+                border: "none",
+                borderRadius: 4,
+                cursor: "pointer",
+              }}
+            >
+              {c.label}
+            </button>
+          );
+        })}
       </div>
 
       <div style={{ flex: 1 }}>
         <MapImpl
           camera={camera}
           markers={places}
-          category={category}
+          categories={CATEGORIES}
+          activeCategories={activeCategories}
           poiList={poiList}
           onPoiFound={setPoiList}
           onMapClick={(latlng) => set({ ...latlng, name: "새 장소" })}
