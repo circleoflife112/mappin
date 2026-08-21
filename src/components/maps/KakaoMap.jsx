@@ -3,13 +3,14 @@ import { Map, MapMarker, useKakaoLoader } from "react-kakao-maps-sdk";
 
 export default function KakaoMap({
   camera,
-  markers,
+  selected,
+  pinned,
   categories,
-  activeCategories,
+  activeCategory,
   poiList,
   onPoiFound,
   onMapClick,
-  onMarkerClick,
+  onPoiClick, // ← onPoiClick 추가
 }) {
   const mapRef = useRef(null);
   const [loading, error] = useKakaoLoader({
@@ -23,49 +24,38 @@ export default function KakaoMap({
     }
   }, [camera]);
 
-  // 활성 카테고리들이 바뀌면 각각 검색해서 합침
+  // 카테고리(단일)가 바뀌면 검색
   useEffect(() => {
     if (!mapRef.current) return;
-
-    const codes = [...activeCategories];
-    if (codes.length === 0) {
+    if (!activeCategory) {
       onPoiFound([]);
       return;
     }
-
     const ps = new kakao.maps.services.Places(mapRef.current);
-    let collected = [];
-    let done = 0;
-
-    codes.forEach((code) => {
-      ps.categorySearch(
-        code,
-        (data, status) => {
-          if (status === kakao.maps.services.Status.OK) {
-            collected = collected.concat(
-              data.map((d) => ({
-                id: d.id,
-                lat: +d.y,
-                lng: +d.x,
-                name: d.place_name,
-                category: code, // 어느 카테고리인지 표시 (색 구분용)
-              })),
-            );
-          }
-          done += 1;
-          if (done === codes.length) {
-            onPoiFound(collected); // 다 끝나면 한 번에 반영
-          }
-        },
-        { useMapBounds: true },
-      );
-    });
-  }, [activeCategories]);
+    ps.categorySearch(
+      activeCategory,
+      (data, status) => {
+        if (status === kakao.maps.services.Status.OK) {
+          onPoiFound(
+            data.map((d) => ({
+              id: d.id,
+              lat: +d.y,
+              lng: +d.x,
+              name: d.place_name,
+              category: activeCategory,
+            })),
+          );
+        } else {
+          onPoiFound([]);
+        }
+      },
+      { useMapBounds: true },
+    );
+  }, [activeCategory]);
 
   if (loading) return <p>지도 로딩중…</p>;
   if (error) return <p>지도 로드 실패 (키/도메인 확인)</p>;
 
-  // 카테고리 코드 → 색 빠르게 찾기
   const colorOf = (code) =>
     categories.find((c) => c.code === code)?.color ?? "#888";
 
@@ -82,21 +72,29 @@ export default function KakaoMap({
         onMapClick({ lat: latlng.getLat(), lng: latlng.getLng() });
       }}
     >
-      {/* 목적지 핀 (하나 고정, 기본 마커) */}
-      {markers.map((m) => (
+      {/* 고정된 핀 (있으면 우선, 기본 마커) */}
+      {pinned && (
         <MapMarker
-          key={m.id}
-          position={{ lat: m.lat, lng: m.lng }}
-          onClick={() => onMarkerClick(m.id)}
+          position={{ lat: pinned.lat, lng: pinned.lng }}
+          title={pinned.name}
         />
-      ))}
+      )}
 
-      {/* 카테고리 결과 핀 (여러 개, 색 구분) */}
+      {/* 지정만 한 임시 장소 (고정 안 됐을 때만, 반투명 느낌) */}
+      {selected && !pinned && (
+        <MapMarker
+          position={{ lat: selected.lat, lng: selected.lng }}
+          title={selected.name}
+        />
+      )}
+
+      {/* 카테고리 결과 핀 */}
       {poiList.map((p) => (
         <MapMarker
           key={p.id}
           position={{ lat: p.lat, lng: p.lng }}
           title={p.name}
+          onClick={() => onPoiClick(p)}
           image={{
             src: `data:image/svg+xml;utf8,${encodeURIComponent(
               `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><circle cx="10" cy="10" r="7" fill="${colorOf(p.category)}" stroke="white" stroke-width="2"/></svg>`,
