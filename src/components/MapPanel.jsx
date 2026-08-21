@@ -14,8 +14,8 @@ const CATEGORIES = [
 export default function MapPanel({ MapImpl }) {
   const { coords, status, locate } = useGeolocation();
   const [query, setQuery] = useState("");
-  const [selected, setSelected] = useState(null); // 지정만 한 임시 장소
-  const [pinned, setPinned] = useState(null); // 고정한 장소
+  const [selected, setSelected] = useState(null); // 지금 보고 있는 임시 장소
+  const [pinnedList, setPinnedList] = useState([]); // 고정된 여러 장소
   const [activeCategory, setActiveCategory] = useState(null); // 카테고리 하나
   const [poiList, setPoiList] = useState([]);
   const [camera, setCamera] = useState({
@@ -29,11 +29,19 @@ export default function MapPanel({ MapImpl }) {
   };
 
   const togglePin = () => {
-    if (pinned) {
-      setPinned(null); // 이미 고정돼 있으면 해제
-    } else if (selected) {
-      setPinned(selected); // 지정한 장소를 고정
-    }
+    if (!selected) return;
+    setPinnedList((prev) => {
+      // 이미 고정된 장소면 빼고(해제), 아니면 추가
+      const exists = prev.some(
+        (p) => p.lat === selected.lat && p.lng === selected.lng,
+      );
+      if (exists) {
+        return prev.filter(
+          (p) => !(p.lat === selected.lat && p.lng === selected.lng),
+        );
+      }
+      return [...prev, selected];
+    });
   };
 
   useEffect(() => {
@@ -47,6 +55,10 @@ export default function MapPanel({ MapImpl }) {
     setSelected(hit);
     setCamera({ lat: hit.lat, lng: hit.lng, zoom: 16 });
   };
+
+  const isSelectedPinned =
+    selected &&
+    pinnedList.some((p) => p.lat === selected.lat && p.lng === selected.lng);
 
   return (
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
@@ -77,18 +89,18 @@ export default function MapPanel({ MapImpl }) {
           <button
             type="button"
             onClick={togglePin}
-            disabled={!selected && !pinned}
+            disabled={!selected}
             style={{
               padding: "6px 12px",
-              background: pinned ? "#333" : "#4f46e5",
+              background: isSelectedPinned ? "#333" : "#4f46e5",
               color: "#fff",
               border: "none",
               borderRadius: 4,
-              cursor: selected || pinned ? "pointer" : "not-allowed",
-              opacity: selected || pinned ? 1 : 0.5,
+              cursor: selected ? "pointer" : "not-allowed",
+              opacity: selected ? 1 : 0.5,
             }}
           >
-            {pinned ? "핀 해제" : "이 장소 핀하기"}
+            {isSelectedPinned ? "핀 해제" : "이 장소 핀하기"}
           </button>
         </div>
 
@@ -128,7 +140,7 @@ export default function MapPanel({ MapImpl }) {
         <MapImpl
           camera={camera}
           selected={selected}
-          pinned={pinned}
+          pinnedList={pinnedList}
           categories={CATEGORIES}
           activeCategory={activeCategory}
           poiList={poiList}

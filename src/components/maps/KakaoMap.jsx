@@ -4,13 +4,13 @@ import { Map, MapMarker, useKakaoLoader } from "react-kakao-maps-sdk";
 export default function KakaoMap({
   camera,
   selected,
-  pinned,
+  pinnedList,
   categories,
   activeCategory,
   poiList,
   onPoiFound,
   onMapClick,
-  onPoiClick, // ← onPoiClick 추가
+  onPoiClick, // pinned → pinnedList
 }) {
   const mapRef = useRef(null);
   const [loading, error] = useKakaoLoader({
@@ -72,21 +72,25 @@ export default function KakaoMap({
         onMapClick({ lat: latlng.getLat(), lng: latlng.getLng() });
       }}
     >
-      {/* 고정된 핀 (있으면 우선, 기본 마커) */}
-      {pinned && (
+      {/* 고정된 핀들 (여러 개, 기본 마커) */}
+      {pinnedList.map((p, i) => (
         <MapMarker
-          position={{ lat: pinned.lat, lng: pinned.lng }}
-          title={pinned.name}
+          key={`pin-${i}`}
+          position={{ lat: p.lat, lng: p.lng }}
+          title={p.name}
         />
-      )}
+      ))}
 
-      {/* 지정만 한 임시 장소 (고정 안 됐을 때만, 반투명 느낌) */}
-      {selected && !pinned && (
-        <MapMarker
-          position={{ lat: selected.lat, lng: selected.lng }}
-          title={selected.name}
-        />
-      )}
+      {/* 지금 보고 있는 임시 장소 (아직 고정 안 한 것만) */}
+      {selected &&
+        !pinnedList.some(
+          (p) => p.lat === selected.lat && p.lng === selected.lng,
+        ) && (
+          <MapMarker
+            position={{ lat: selected.lat, lng: selected.lng }}
+            title={selected.name}
+          />
+        )}
 
       {/* 카테고리 결과 핀 */}
       {poiList.map((p) => (
