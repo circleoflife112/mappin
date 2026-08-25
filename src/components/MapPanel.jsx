@@ -44,6 +44,12 @@ export default function MapPanel({ MapImpl }) {
     });
   };
 
+  const removePin = (place) => {
+    setPinnedList((prev) =>
+      prev.filter((p) => !(p.lat === place.lat && p.lng === place.lng)),
+    );
+  };
+
   useEffect(() => {
     if (coords) setCamera({ ...coords, zoom: 16 });
   }, [coords]);
@@ -151,6 +157,7 @@ export default function MapPanel({ MapImpl }) {
           onPoiClick={(place) =>
             setSelected({ lat: place.lat, lng: place.lng, name: place.name })
           }
+          onPinClick={removePin}
         />
       </div>
     </div>

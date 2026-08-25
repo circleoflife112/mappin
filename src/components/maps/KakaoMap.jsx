@@ -10,7 +10,8 @@ export default function KakaoMap({
   poiList,
   onPoiFound,
   onMapClick,
-  onPoiClick, // pinned → pinnedList
+  onPoiClick,
+  onPinClick, // ← onPinClick 추가
 }) {
   const mapRef = useRef(null);
   const [loading, error] = useKakaoLoader({
@@ -72,12 +73,13 @@ export default function KakaoMap({
         onMapClick({ lat: latlng.getLat(), lng: latlng.getLng() });
       }}
     >
-      {/* 고정된 핀들 (여러 개, 기본 마커) */}
+      {/* 고정된 핀들 (클릭하면 해제) */}
       {pinnedList.map((p, i) => (
         <MapMarker
           key={`pin-${i}`}
           position={{ lat: p.lat, lng: p.lng }}
           title={p.name}
+          onClick={() => onPinClick(p)}
         />
       ))}
 
