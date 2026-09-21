@@ -255,7 +255,7 @@ export default function MapPanel({ MapImpl }) {
           activeCategory={activeCategory}
           poiList={poiList}
           onPoiFound={setPoiList}
-          onMapClick={(latlng) => setSelected({ ...latlng, name: "지정한 장소" })}
+          onMapClick={activeCategory ? () => {} : (latlng) => setSelected({ ...latlng, name: "지정한 장소" })}
           onPoiClick={(place) =>
             setSelected({
               lat: place.lat,
