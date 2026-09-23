@@ -138,19 +138,25 @@ export default function KakaoMap({
           />
         )}
 
-      {/* 카테고리 POI 결과 — 컬러 도트 */}
-      {poiList.map((p) => (
-        <MapMarker
-          key={p.id}
-          position={{ lat: p.lat, lng: p.lng }}
-          title={p.name}
-          image={{
-            src: makePoiDot(colorOf(p.category)),
-            size: { width: 22, height: 22 },
-          }}
-          onClick={() => onPoiClick(p)}
-        />
-      ))}
+      {/* 카테고리 POI 결과 — 컬러 도트 (선택된 장소 및 고정된 장소는 제외) */}
+      {poiList
+        .filter(
+          (p) =>
+            p.id !== selected?.id &&
+            !pinnedList.some((pin) => pin.id === p.id)
+        )
+        .map((p) => (
+          <MapMarker
+            key={p.id}
+            position={{ lat: p.lat, lng: p.lng }}
+            title={p.name}
+            image={{
+              src: makePoiDot(colorOf(p.category)),
+              size: { width: 22, height: 22 },
+            }}
+            onClick={() => onPoiClick(p)}
+          />
+        ))}
     </Map>
   );
 }
