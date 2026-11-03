@@ -5,10 +5,10 @@ import { geocode } from "../lib/geocode";
 import { fakeRating, fakeReviewCount } from "../lib/fakeInfo";
 
 const CATEGORIES = [
-  { code: "CE7", label: "카페",  icon: "☕", color: "#f97316" },
-  { code: "FD6", label: "맛집",  icon: "🍽️", color: "#ef4444" },
-  { code: "AT4", label: "공원",  icon: "🌳", color: "#22c55e" },
-  { code: "MT1", label: "쇼핑",  icon: "🛍️", color: "#8b5cf6" },
+  { code: "CE7", label: "카페", icon: "☕", color: "#f97316" },
+  { code: "FD6", label: "맛집", icon: "🍽️", color: "#f97316" },
+  { code: "AT4", label: "공원", icon: "🌳", color: "#f97316" },
+  { code: "MT1", label: "쇼핑", icon: "🛍️", color: "#f97316" },
 ];
 
 const CAT_ICON = { CE7: "☕", FD6: "🍽️", AT4: "🌳", MT1: "🛍️" };
@@ -113,7 +113,10 @@ function TabBar() {
   return (
     <div className="flex-shrink-0 bg-white border-t border-gray-100 flex justify-around items-center pt-2 pb-5">
       {tabs.map((t) => (
-        <button key={t.label} className="flex flex-col items-center gap-0.5 px-4">
+        <button
+          key={t.label}
+          className="flex flex-col items-center gap-0.5 px-4"
+        >
           <span className="text-xl">{t.icon}</span>
           <span
             className={`text-[10px] font-medium ${
@@ -136,7 +139,12 @@ export default function MapPanel({ MapImpl }) {
   const [pinnedList, setPinnedList] = useState([]);
   const [activeCategory, setActiveCategory] = useState(null);
   const [poiList, setPoiList] = useState([]);
-  const [camera, setCamera] = useState({ lat: 37.5665, lng: 126.978, zoom: 13 });
+  const [panelCollapsed, setPanelCollapsed] = useState(false);
+  const [camera, setCamera] = useState({
+    lat: 37.5665,
+    lng: 126.978,
+    zoom: 13,
+  });
 
   const toggleCategory = (code) =>
     setActiveCategory((prev) => (prev === code ? null : code));
@@ -145,17 +153,19 @@ export default function MapPanel({ MapImpl }) {
     if (!selected) return;
     setPinnedList((prev) => {
       const exists = prev.some(
-        (p) => p.lat === selected.lat && p.lng === selected.lng
+        (p) => p.lat === selected.lat && p.lng === selected.lng,
       );
       return exists
-        ? prev.filter((p) => !(p.lat === selected.lat && p.lng === selected.lng))
+        ? prev.filter(
+            (p) => !(p.lat === selected.lat && p.lng === selected.lng),
+          )
         : [...prev, selected];
     });
   };
 
   const removePin = (place) =>
     setPinnedList((prev) =>
-      prev.filter((p) => !(p.lat === place.lat && p.lng === place.lng))
+      prev.filter((p) => !(p.lat === place.lat && p.lng === place.lng)),
     );
 
   useEffect(() => {
@@ -175,17 +185,18 @@ export default function MapPanel({ MapImpl }) {
     pinnedList.some((p) => p.lat === selected.lat && p.lng === selected.lng);
 
   const pinnedNotSelected = pinnedList.filter(
-    (p) => !(selected && p.lat === selected.lat && p.lng === selected.lng)
+    (p) => !(selected && p.lat === selected.lat && p.lng === selected.lng),
   );
 
   return (
     <div className="h-full flex flex-col bg-white overflow-hidden">
-
       {/* ── 헤더 ── */}
       <div className="flex-shrink-0 bg-white px-3 pt-10 pb-2 flex items-center gap-2">
         {/* Logo */}
         <div className="flex-shrink-0 border border-gray-300 rounded-full px-3.5 py-1.5">
-          <span className="text-sm font-bold text-gray-900 tracking-tight">mappin</span>
+          <span className="text-sm font-bold text-gray-900 tracking-tight">
+            mappin
+          </span>
         </div>
 
         {/* Search */}
@@ -213,10 +224,18 @@ export default function MapPanel({ MapImpl }) {
           {status === "loading" ? (
             <span className="text-xs font-bold">…</span>
           ) : (
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-              <line x1="3" y1="12" x2="21" y2="12"/>
-              <line x1="3" y1="6"  x2="21" y2="6"/>
-              <line x1="3" y1="18" x2="21" y2="18"/>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+            >
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="18" x2="21" y2="18" />
             </svg>
           )}
         </button>
@@ -233,9 +252,10 @@ export default function MapPanel({ MapImpl }) {
               onClick={() => toggleCategory(c.code)}
               className={`flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full border
                 text-sm font-medium transition-all duration-150
-                ${on
-                  ? "bg-orange-500 border-orange-500 text-white shadow-sm"
-                  : "bg-white border-gray-200 text-gray-700"
+                ${
+                  on
+                    ? "bg-orange-500 border-orange-500 text-white shadow-sm"
+                    : "bg-white border-gray-200 text-gray-700"
                 }`}
             >
               <span className="text-base">{c.icon}</span>
@@ -255,7 +275,11 @@ export default function MapPanel({ MapImpl }) {
           activeCategory={activeCategory}
           poiList={poiList}
           onPoiFound={setPoiList}
-          onMapClick={activeCategory ? () => {} : (latlng) => setSelected({ ...latlng, name: "지정한 장소" })}
+          onMapClick={
+            activeCategory
+              ? () => {}
+              : (latlng) => setSelected({ ...latlng, name: "지정한 장소" })
+          }
           onPoiClick={(place) =>
             setSelected({
               lat: place.lat,
@@ -277,9 +301,17 @@ export default function MapPanel({ MapImpl }) {
             onClick={locate}
             className="w-9 h-9 bg-white rounded-xl shadow-md flex items-center justify-center text-gray-600"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <circle cx="12" cy="12" r="3"/>
-              <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+            >
+              <circle cx="12" cy="12" r="3" />
+              <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" />
             </svg>
           </button>
           <button className="w-9 h-9 bg-white rounded-xl shadow-md flex items-center justify-center text-gray-600 font-bold text-lg leading-none">
@@ -304,9 +336,13 @@ export default function MapPanel({ MapImpl }) {
       </div>
 
       {/* ── 하단 장소 패널 ── */}
+      {/* ── 하단 장소 패널 ── */}
       <div
         className="flex-shrink-0 bg-white rounded-t-3xl overflow-y-auto no-scrollbar"
-        style={{ maxHeight: "46%", boxShadow: "0 -6px 24px rgba(0,0,0,0.08)" }}
+        style={{
+          maxHeight: panelCollapsed ? "auto" : "46%",
+          boxShadow: "0 -6px 24px rgba(0,0,0,0.08)",
+        }}
       >
         {/* 드래그 핸들 */}
         <div className="flex justify-center pt-2.5 pb-1">
@@ -323,39 +359,60 @@ export default function MapPanel({ MapImpl }) {
                 : "장소를 눌러 확인하세요"}
             </p>
           </div>
-          <button className="w-8 h-8 bg-orange-50 rounded-full flex items-center justify-center text-orange-500">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="18 15 12 9 6 15"/>
+          <button
+            onClick={() => setPanelCollapsed((v) => !v)}
+            className="w-8 h-8 bg-orange-50 rounded-full flex items-center justify-center text-orange-500"
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              style={{
+                transform: panelCollapsed ? "rotate(180deg)" : "none",
+                transition: "transform 0.2s",
+              }}
+            >
+              <polyline points="18 15 12 9 6 15" />
             </svg>
           </button>
         </div>
 
-        {/* 선택된 장소 카드 (featured) */}
-        {selected && (
-          <PlaceCard
-            place={selected}
-            isPinned={isSelectedPinned}
-            onPin={togglePin}
-            featured
-          />
-        )}
+        {/* 접혔을 때는 아래 내용 숨김 */}
+        {!panelCollapsed && (
+          <>
+            {/* 선택된 장소 카드 (featured) */}
+            {selected && (
+              <PlaceCard
+                place={selected}
+                isPinned={isSelectedPinned}
+                onPin={togglePin}
+                featured
+              />
+            )}
 
-        {/* 고정된 장소 목록 */}
-        {pinnedNotSelected.map((p, i) => (
-          <PlaceCard
-            key={`${p.lat}-${p.lng}-${i}`}
-            place={p}
-            isPinned
-            onPin={() => removePin(p)}
-            onRemove={() => removePin(p)}
-          />
-        ))}
+            {/* 고정된 장소 목록 */}
+            {pinnedNotSelected.map((p, i) => (
+              <PlaceCard
+                key={`${p.lat}-${p.lng}-${i}`}
+                place={p}
+                isPinned
+                onPin={() => removePin(p)}
+                onRemove={() => removePin(p)}
+              />
+            ))}
 
-        {/* 빈 상태 */}
-        {!selected && pinnedList.length === 0 && (
-          <div className="py-8 text-center text-sm text-gray-400">
-            지도를 눌러 장소를 선택해 보세요
-          </div>
+            {/* 빈 상태 */}
+            {!selected && pinnedList.length === 0 && (
+              <div className="py-8 text-center text-sm text-gray-400">
+                지도를 눌러 장소를 선택해 보세요
+              </div>
+            )}
+          </>
         )}
       </div>
 
